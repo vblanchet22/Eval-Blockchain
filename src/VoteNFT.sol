@@ -5,13 +5,13 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract VoteNFT is ERC721, Ownable {
-    uint private _tokenIdCounter;
+    uint256 private _tokenIdCounter;
 
     constructor() ERC721("VoteNFT", "VNFT") Ownable(msg.sender) {}
 
-    function mint(address to) public onlyOwner returns (uint) {
+    function mint(address to) public onlyOwner returns (uint256) {
         _tokenIdCounter++;
-        uint tokenId = _tokenIdCounter;
+        uint256 tokenId = _tokenIdCounter;
         _safeMint(to, tokenId);
         return tokenId;
     }

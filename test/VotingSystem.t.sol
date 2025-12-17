@@ -132,19 +132,19 @@ contract VotingSystemTest is Test {
 
     // Test 11: Initial workflow status is REGISTER_CANDIDATES
     function test_InitialWorkflowStatusIsRegisterCandidates() public {
-        assertEq(uint(votingSystem.workflowStatus()), uint(VotingSystem.WorkflowStatus.REGISTER_CANDIDATES));
+        assertEq(uint256(votingSystem.workflowStatus()), uint256(VotingSystem.WorkflowStatus.REGISTER_CANDIDATES));
     }
 
     // Test 12: Admin can change workflow status
     function test_AdminCanChangeWorkflowStatus() public {
         votingSystem.setWorkflowStatus(VotingSystem.WorkflowStatus.FOUND_CANDIDATES);
-        assertEq(uint(votingSystem.workflowStatus()), uint(VotingSystem.WorkflowStatus.FOUND_CANDIDATES));
+        assertEq(uint256(votingSystem.workflowStatus()), uint256(VotingSystem.WorkflowStatus.FOUND_CANDIDATES));
 
         votingSystem.setWorkflowStatus(VotingSystem.WorkflowStatus.VOTE);
-        assertEq(uint(votingSystem.workflowStatus()), uint(VotingSystem.WorkflowStatus.VOTE));
+        assertEq(uint256(votingSystem.workflowStatus()), uint256(VotingSystem.WorkflowStatus.VOTE));
 
         votingSystem.setWorkflowStatus(VotingSystem.WorkflowStatus.COMPLETED);
-        assertEq(uint(votingSystem.workflowStatus()), uint(VotingSystem.WorkflowStatus.COMPLETED));
+        assertEq(uint256(votingSystem.workflowStatus()), uint256(VotingSystem.WorkflowStatus.COMPLETED));
     }
 
     // Test 13: Non-admin cannot change workflow status
@@ -174,8 +174,7 @@ contract VotingSystemTest is Test {
     function test_WorkflowStatusChangedEventIsEmitted() public {
         vm.expectEmit(true, true, true, true);
         emit VotingSystem.WorkflowStatusChanged(
-            VotingSystem.WorkflowStatus.REGISTER_CANDIDATES,
-            VotingSystem.WorkflowStatus.VOTE
+            VotingSystem.WorkflowStatus.REGISTER_CANDIDATES, VotingSystem.WorkflowStatus.VOTE
         );
         votingSystem.setWorkflowStatus(VotingSystem.WorkflowStatus.VOTE);
     }
@@ -308,7 +307,7 @@ contract VotingSystemTest is Test {
         assertEq(votingSystem.voteStartTime(), 0);
 
         votingSystem.setWorkflowStatus(VotingSystem.WorkflowStatus.VOTE);
-        uint voteTime = votingSystem.voteStartTime();
+        uint256 voteTime = votingSystem.voteStartTime();
         assertGt(voteTime, 0);
 
         votingSystem.setWorkflowStatus(VotingSystem.WorkflowStatus.COMPLETED);

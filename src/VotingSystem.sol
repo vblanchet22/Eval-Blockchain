@@ -16,23 +16,23 @@ contract VotingSystem is AccessControl {
     }
 
     struct Candidate {
-        uint id;
+        uint256 id;
         string name;
-        uint voteCount;
-        uint fundsReceived;
+        uint256 voteCount;
+        uint256 fundsReceived;
     }
 
     WorkflowStatus public workflowStatus;
-    uint public voteStartTime;
+    uint256 public voteStartTime;
     VoteNFT public voteNFT;
-    mapping(uint => Candidate) public candidates;
+    mapping(uint256 => Candidate) public candidates;
     mapping(address => bool) public voters;
-    uint[] private candidateIds;
+    uint256[] private candidateIds;
 
     event WorkflowStatusChanged(WorkflowStatus previousStatus, WorkflowStatus newStatus);
-    event FundsSentToCandidate(uint candidateId, uint amount, address founder);
-    event VoteCast(address voter, uint candidateId, uint nftTokenId);
-    event WinnerDeclared(uint candidateId, string candidateName, uint voteCount);
+    event FundsSentToCandidate(uint256 candidateId, uint256 amount, address founder);
+    event VoteCast(address voter, uint256 candidateId, uint256 nftTokenId);
+    event WinnerDeclared(uint256 candidateId, string candidateName, uint256 voteCount);
 
     modifier onlyAtStatus(WorkflowStatus _status) {
         require(workflowStatus == _status, "Invalid workflow status for this action");
@@ -58,14 +58,23 @@ contract VotingSystem is AccessControl {
         emit WorkflowStatusChanged(previousStatus, _newStatus);
     }
 
-    function addCandidate(string memory _name) public onlyRole(ADMIN_ROLE) onlyAtStatus(WorkflowStatus.REGISTER_CANDIDATES) {
+    function addCandidate(string memory _name)
+        public
+        onlyRole(ADMIN_ROLE)
+        onlyAtStatus(WorkflowStatus.REGISTER_CANDIDATES)
+    {
         require(bytes(_name).length > 0, "Candidate name cannot be empty");
-        uint candidateId = candidateIds.length + 1;
+        uint256 candidateId = candidateIds.length + 1;
         candidates[candidateId] = Candidate(candidateId, _name, 0, 0);
         candidateIds.push(candidateId);
     }
 
-    function fundCandidate(uint _candidateId) public payable onlyRole(FOUNDER_ROLE) onlyAtStatus(WorkflowStatus.FOUND_CANDIDATES) {
+    function fundCandidate(uint256 _candidateId)
+        public
+        payable
+        onlyRole(FOUNDER_ROLE)
+        onlyAtStatus(WorkflowStatus.FOUND_CANDIDATES)
+    {
         require(_candidateId > 0 && _candidateId <= candidateIds.length, "Invalid candidate ID");
         require(msg.value > 0, "Must send funds");
 
@@ -73,8 +82,11 @@ contract VotingSystem is AccessControl {
         emit FundsSentToCandidate(_candidateId, msg.value, msg.sender);
     }
 
-    function vote(uint _candidateId) public onlyAtStatus(WorkflowStatus.VOTE) {
-        require(block.timestamp >= voteStartTime + 1 hours, "Voting not open yet, please wait 1 hour after vote status activation");
+    function vote(uint256 _candidateId) public onlyAtStatus(WorkflowStatus.VOTE) {
+        require(
+            block.timestamp >= voteStartTime + 1 hours,
+            "Voting not open yet, please wait 1 hour after vote status activation"
+        );
         require(!voteNFT.hasVoted(msg.sender), "You have already voted (NFT already owned)");
         require(!voters[msg.sender], "You have already voted");
         require(_candidateId > 0 && _candidateId <= candidateIds.length, "Invalid candidate ID");
@@ -83,20 +95,20 @@ contract VotingSystem is AccessControl {
         candidates[_candidateId].voteCount += 1;
 
         // Mint NFT to voter
-        uint tokenId = voteNFT.mint(msg.sender);
+        uint256 tokenId = voteNFT.mint(msg.sender);
         emit VoteCast(msg.sender, _candidateId, tokenId);
     }
 
-    function getTotalVotes(uint _candidateId) public view returns (uint) {
+    function getTotalVotes(uint256 _candidateId) public view returns (uint256) {
         require(_candidateId > 0 && _candidateId <= candidateIds.length, "Invalid candidate ID");
         return candidates[_candidateId].voteCount;
     }
 
-    function getCandidatesCount() public view returns (uint) {
+    function getCandidatesCount() public view returns (uint256) {
         return candidateIds.length;
     }
 
-    function getCandidate(uint _candidateId) public view returns (Candidate memory) {
+    function getCandidate(uint256 _candidateId) public view returns (Candidate memory) {
         require(_candidateId > 0 && _candidateId <= candidateIds.length, "Invalid candidate ID");
         return candidates[_candidateId];
     }
@@ -104,11 +116,11 @@ contract VotingSystem is AccessControl {
     function getWinner() public onlyAtStatus(WorkflowStatus.COMPLETED) returns (Candidate memory) {
         require(candidateIds.length > 0, "No candidates registered");
 
-        uint winnerCandidateId = candidateIds[0];
-        uint maxVotes = candidates[winnerCandidateId].voteCount;
+        uint256 winnerCandidateId = candidateIds[0];
+        uint256 maxVotes = candidates[winnerCandidateId].voteCount;
 
-        for (uint i = 1; i < candidateIds.length; i++) {
-            uint candidateId = candidateIds[i];
+        for (uint256 i = 1; i < candidateIds.length; i++) {
+            uint256 candidateId = candidateIds[i];
             if (candidates[candidateId].voteCount > maxVotes) {
                 maxVotes = candidates[candidateId].voteCount;
                 winnerCandidateId = candidateId;
